@@ -1,6 +1,6 @@
 module.exports = {
 
-        token: "token_here",
+        token: "MTA2MTExNzk4MDExODg4NDUxNA.G4wPbX.uslonlDd1wLLpMrmzn44Jc9SRIyAu08ifklCyM",
         prefix: "!",
         statusMessage: "with my 25 characters!",
         color: "#0000FF",
