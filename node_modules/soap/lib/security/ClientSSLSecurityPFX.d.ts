@@ -13,6 +13,7 @@ export declare class ClientSSLSecurityPFX implements ISecurity {
     private defaults;
     private passphrase;
     constructor(pfx: string | Buffer, defaults?: any);
+    constructor(pfx: string | Buffer, passphrase: string, defaults?: any);
     toXML(): string;
     addOptions(options: any): void;
 }

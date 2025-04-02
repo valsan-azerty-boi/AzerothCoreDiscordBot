@@ -7,14 +7,14 @@ This way it verifies if the user is trying to use his own account created using 
 
 Requirements:
 
-    - NodeJS (Tested with v16.6.2)
+    - NodeJS (Tested with v16.9.1)
     - Modules (Use installation to install them)
     - Discord Account with a bot account for bot token
 
 Installation:
 
     - Run "npm install", this will install all dependencies
-    - Rename "config_template.js" to "config.js" and insert all your information: token, usernames, passwords, ...
+    - Rename "config.js.dist" to "config.js" and insert all your information: token, usernames, passwords, ...
     - Make sure your AzerothCore server has enabled SOAP.
 
 Startup: 
