@@ -24,7 +24,7 @@ module.exports = {
         .setDescription('Take a look at your accounts info below:')
         .setTimestamp()
         .setFooter('Createmulti command', client.user.displayAvatarURL());
-        connection.query('USE acore_auth')
+        connection.query('USE ' + config.databaseAuth)
         for(let counter = 1, myError = false; counter <= amount && myError === false; counter++){
           connection.query('select count(username) from account where reg_mail = ?', [message.author.id], (error, results, fields) => {
 

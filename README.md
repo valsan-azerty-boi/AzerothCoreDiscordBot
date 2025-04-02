@@ -1,7 +1,7 @@
 Bot startup
 ----------------------------
 
-Info: This bot uses Discord ID and stores it into the SQL database acore_auth => account => reg_mail
+Info: This bot uses Discord ID and stores it into the SQL acore auth database => account => reg_mail
 
 This way it verifies if the user is trying to use his own account created using the bot
 

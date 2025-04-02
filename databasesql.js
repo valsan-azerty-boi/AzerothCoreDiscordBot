@@ -9,7 +9,7 @@ module.exports = (client) => {
       host     : config.databaseHost,
       user     : config.databaseUser,
       password : config.databasePassword,
-      database: "acore_auth"
+      database : config.databaseAuth
     });
 
     module.exports = connection

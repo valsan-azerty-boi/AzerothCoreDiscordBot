@@ -1,16 +1,15 @@
 module.exports = {
-
         token: "discord_token_here",
         prefix: "!",
         statusMessage: "",
         color: "#0000FF",
-
         databaseHost: 'localhost',
         databaseUser     : 'user',
         databasePassword : 'password',
-
+        databaseAuth: 'acore_auth',
+        databaseWorld: 'acore_world',
+        databaseCharacter: 'acore_characters',
         soapPort: 7878,
         soapHostname: "127.0.0.1",
         soapAuth: "username:passwd"
-
 }

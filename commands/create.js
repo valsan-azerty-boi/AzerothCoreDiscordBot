@@ -15,7 +15,7 @@ module.exports = {
       if(!args[1]) return message.reply(`You need to add a password after the username. \nUsage: **!create <username> <password>**`)
       let username = args[0];
       let password = args[1];
-      connection.query('USE acore_auth')
+      connection.query('USE ' + config.databaseAuth)
         connection.query('select COUNT(username) from account where reg_mail = ?', [message.author.id], (error, results, fields) => {
 
           if (error) return message.reply('An error occured.')

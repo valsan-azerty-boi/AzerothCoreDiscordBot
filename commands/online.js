@@ -8,21 +8,17 @@ module.exports = {
     description: "Gives list of online players.",
     DMonly: false,
     execute(message, args) {
-        connection.query("USE acore_characters");
+        connection.query("USE" + config.databaseCharacter);
 
         connection.query("SELECT name FROM characters WHERE online = 1", (error, results1) => {
             if (error) {
-                console.error("Erreur SQL:", error);
-                return message.reply("❌ Une erreur s'est produite lors de la récupération des joueurs en ligne.");
+                console.error("SQL Error:", error);
+                return message.reply("❌ An error occurred while retrieving online players.");
             }
 
-            let onlinePlayers = [];
-            if (results1 && results1.length > 0) {
-                results1.forEach(row => onlinePlayers.push(row.name));
-            }
-
-            const counter = onlinePlayers.length;
-            const description = counter > 0 ? onlinePlayers.join(", ") : "There is no one online.";
+            let onlinePlayers = results1.map(row => row.name);
+            let counter = onlinePlayers.length;
+            let description = counter > 0 ? onlinePlayers.join(", ") : "There is no one online.";
 
             const embed = new EmbedBuilder()
                 .setColor(config.color)
@@ -30,9 +26,9 @@ module.exports = {
                 .setDescription(description)
                 .addFields({ name: "Amount of characters online:", value: `${counter} characters` })
                 .setTimestamp()
-                .setFooter({ text: "Online command", iconURL: client.user.displayAvatarURL() });
+                .setFooter({ text: "Online command", iconURL: client.user?.displayAvatarURL() || "" });
 
-            message.channel.send({ embeds: [embed] });
+            message.channel.send({ embeds: [embed] }).catch(console.error);
         });
     },
 };

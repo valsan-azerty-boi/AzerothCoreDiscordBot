@@ -11,11 +11,11 @@ module.exports = {
 	execute(message, args) {
     if(!args[0]) return message.reply(`You need to add a character name after the command. \nUsage: **!changefaction <charactername>**`)
     let charName = args[0].charAt(0).toUpperCase() + args[0].slice(1).toLowerCase();
-    connection.query('USE acore_characters')
+    connection.query('USE ' + config.databaseCharacter)
       connection.query('select account from characters where name = ?', [charName], (error, results1, fields) => {
         if(!results1[0]) return message.reply(`Character doesn't exist!`)
         if (error) return console.log(error)
-        connection.query('USE acore_auth')
+        connection.query('USE ' + config.databaseAuth)
         connection.query('select id from account where reg_mail = ? AND id = ?', [message.author.id, results1[0].account], (error, results2, fields) => {
           if(results2) console.log(results2)
           if(!results2 || !results2[0]) return message.reply(`Couldn't find account connected to the character.`)
