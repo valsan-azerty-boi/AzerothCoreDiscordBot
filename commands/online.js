@@ -1,68 +1,38 @@
-const Discord = require("discord.js")
-const config = require('../config.js')
-const client = require('../server.js')
-const crypto = require('crypto')
-const connection = require('../databasesql.js');
-const soap = require("../soap.js");
+const { EmbedBuilder } = require("discord.js");
+const config = require("../config.js");
+const client = require("../server.js");
+const connection = require("../databasesql.js");
+
 module.exports = {
-	name: 'online',
-	description: 'Gives list of online players.',
+    name: "online",
+    description: "Gives list of online players.",
     DMonly: false,
-	execute(message, args) {
-    let counter = 0;
-    let onlinePlayers = 0;
-    connection.query('USE acore_characters')
-    connection.query('select name from characters where online = 1', (error, results1, fields) => {
+    execute(message, args) {
+        connection.query("USE acore_characters");
 
-      if(!results1) {
-        onlinePlayers = "There is no one online!"
+        connection.query("SELECT name FROM characters WHERE online = 1", (error, results1) => {
+            if (error) {
+                console.error("Erreur SQL:", error);
+                return message.reply("❌ Une erreur s'est produite lors de la récupération des joueurs en ligne.");
+            }
 
-        const embed = new Discord.MessageEmbed()
-        .setColor(config.color)
-        .setTitle('Online Players')
-        .setDescription(onlinePlayers)
-        .setTimestamp()
-        .setFooter('Online command', client.user.displayAvatarURL());
+            let onlinePlayers = [];
+            if (results1 && results1.length > 0) {
+                results1.forEach(row => onlinePlayers.push(row.name));
+            }
 
-        return message.channel.send(embed);
-      
-      }
+            const counter = onlinePlayers.length;
+            const description = counter > 0 ? onlinePlayers.join(", ") : "There is no one online.";
 
-      if (error) return console.log(error)
+            const embed = new EmbedBuilder()
+                .setColor(config.color)
+                .setTitle("Online Players")
+                .setDescription(description)
+                .addFields({ name: "Amount of characters online:", value: `${counter} characters` })
+                .setTimestamp()
+                .setFooter({ text: "Online command", iconURL: client.user.displayAvatarURL() });
 
-      onlinePlayers = [];
-      results1.forEach(name => {
-        onlinePlayers.push(name.name)
-        counter++;
-      });
-
-      if (counter > 0 ) {
-    
-        console.log(onlinePlayers)
-        const embed = new Discord.MessageEmbed()
-        .setColor(config.color)
-        .setTitle('Online Players')
-        .setDescription(onlinePlayers)
-        .addField(`Amount of characters online:`, counter + ` characters`)
-        .setTimestamp()
-        .setFooter('Online command', client.user.displayAvatarURL());
-        
-        message.channel.send(embed);
-      } else {
-        onlinePlayers = 'There is no one online.'
-
-        const embed = new Discord.MessageEmbed()
-        .setColor(config.color)
-        .setTitle('Online Players')
-        .setDescription(onlinePlayers)
-        .addField(`Amount of characters online:`, counter + ` characters`)
-        .setTimestamp()
-        .setFooter('Online command', client.user.displayAvatarURL());
-        
-        message.channel.send(embed);
-      }
-
-    
-})
-	},
+            message.channel.send({ embeds: [embed] });
+        });
+    },
 };
