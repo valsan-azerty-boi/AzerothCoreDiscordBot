@@ -2,7 +2,7 @@ module.exports = {
 
         token: "discord_token_here",
         prefix: "!",
-        statusMessage: "with my 25 characters!",
+        statusMessage: "",
         color: "#0000FF",
 
         databaseHost: 'localhost',
