@@ -29,23 +29,18 @@ module.exports = {
 
     try {
       await connection.query("USE " + config.databaseAuth);
-
       const [result] = await connection.query("SELECT COUNT(username) AS count FROM account WHERE reg_mail = ?", [message.author.id]);
       const existingAccounts = result[0].count;
+      
+      if (existingAccounts + i <= 25) {
+        const embed = new EmbedBuilder()
+          .setColor(config.color)
+          .setTitle("Accounts Created")
+          .setDescription("Here are the details of your newly created accounts:")
+          .setTimestamp()
+          .setFooter({ text: "Createmulti Command", iconURL: client.user?.displayAvatarURL() || "" });
 
-      if (existingAccounts >= 25) {
-        return message.reply("Error.");
-      }
-
-      const embed = new EmbedBuilder()
-        .setColor(config.color)
-        .setTitle("Accounts Created")
-        .setDescription("Here are the details of your newly created accounts:")
-        .setTimestamp()
-        .setFooter({ text: "Createmulti Command", iconURL: client.user?.displayAvatarURL() || "" });
-
-      for (let i = 1; i <= amount; i++) {
-        if (existingAccounts + i <= 25) {
+        for (let i = 1; i <= amount; i++) {
           const newUsername = `${username}${i}`;
           const result = await soap.Soap(`account create ${newUsername} ${password}`);
 
@@ -56,10 +51,9 @@ module.exports = {
           await connection.query("UPDATE account SET reg_mail = ? WHERE username = ?", [message.author.id, newUsername]);
           embed.addFields({ name: `${i}. Username | Password`, value: `${newUsername} | ${password}`, inline: false });
         }
+
+        await message.channel.send({ embeds: [embed] });
       }
-
-      await message.channel.send({ embeds: [embed] });
-
     } catch (error) {
       console.error("Error: ", error);
     }
