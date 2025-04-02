@@ -15,13 +15,19 @@ module.exports = {
             data.push(commands.map(command => command.name).join(" | "));
             data.push(`\nYou can send \`${config.prefix}help [command name]\` to get info on a specific command!`);
 
+            const embed = new EmbedBuilder()
+            .setColor("#0099ff")
+            .setTitle(`Command: ${command.name}`)
+            .setDescription(command.description || "The help command.")
+            .addFields(
+                { name: "List", value: data.join("\n"), inline: true }
+            )
+            .setTimestamp();
+
             try {
-                await message.author.send({ content: data.join("\n"), split: true });
-                if (message.channel.type !== "DM") {
-                    await message.reply("I've sent you a DM with all my commands!");
-                }
+                await message.channel.send({ embeds: [embed] });
             } catch (error) {
-                console.error(`Unexpected Error: Could not send help DM to ${message.author.tag}.\n`, error);
+                console.error("Unexpected Error: ", error);
             }
             return;
         }
@@ -34,7 +40,7 @@ module.exports = {
         }
 
         const embed = new EmbedBuilder()
-            .setColor("#0099ff") // You can customize the color
+            .setColor("#0099ff")
             .setTitle(`Command: ${command.name}`)
             .setDescription(command.description || "No description available.")
             .addFields(
@@ -43,7 +49,12 @@ module.exports = {
                 { name: "Cooldown", value: `${command.cooldown || 3} second(s)`, inline: true }
             )
             .setTimestamp();
-
-        await message.channel.send({ embeds: [embed] });
+        
+        try {
+            await message.channel.send({ embeds: [embed] });
+        } catch (error) {
+            console.error("Unexpected Error: ", error);
+        }
     },
 };
+//TODO: tests

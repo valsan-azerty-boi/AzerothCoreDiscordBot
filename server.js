@@ -52,9 +52,9 @@ client.on("messageCreate", async message => {
 
     const DMonlyCommand = DMonlies.get(command);
 
-    if (message.guild !== null && DMonlyCommand) 
+    if (message.guild !== null && DMonlyCommand)
         return message.reply("This is a DM-only command.");
-    
+
     if (!client.commands.has(command)) return;
 
     const { cooldowns } = client;

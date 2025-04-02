@@ -1,78 +1,68 @@
-//TODO fix for latest version
-
-const Discord = require("discord.js")
-const config = require('../config.js')
-const client = require('../server.js')
-const crypto = require('crypto')
-const connection = require('../databasesql.js');
+const { EmbedBuilder } = require("discord.js");
+const config = require("../config.js");
+const client = require("../server.js");
+const connection = require("../databasesql.js");
 const soap = require("../soap.js");
+
 module.exports = {
-	name: 'createmulti',
-	description: 'Creates new game accounts. It will use the name and password given and add a number to it at the end.',
+  name: "createmulti",
+  description: "Creates multiple game accounts by appending a number to the given username.",
   DMonly: true,
-	execute(message, args) {
-        if(!args[0]) return message.reply(`You need to add an amount of accounts. \nUsage: **!createmulti <amountofaccounts> <username> <password>**`)
-        if(isNaN(args[0])) return message.reply(`The amount of accounts needs to be a number. \nUsage: **!createmulti <amountofaccounts> <username> <password>**`)
-        if(!args[1]) return message.reply(`You need to add a username after the amount. \nUsage: **!createmulti <amountofaccounts> <username> <password>**`)
-        if(!args[2]) return message.reply(`You need to add a password after the username. \nUsage: **!createmulti <amountofaccounts> <username> <password>**`)
-        if(args[2].length > 14)  return message.reply(`Password needs to be smaller than 14 characters.`)
-        let amount = parseInt(args[0]);
-        let username = args[1];
-        let password = args[2];
 
-        const embed = new Discord.MessageEmbed()
+  async execute(message, args) {
+    if (!args[0] || isNaN(args[0])) {
+      return message.reply("Usage: **!createmulti <amount> <username> <password>**");
+    }
+    if (!args[1]) {
+      return message.reply("You need to specify a username.\nUsage: **!createmulti <amount> <username> <password>**");
+    }
+    if (!args[2]) {
+      return message.reply("You need to specify a password.\nUsage: **!createmulti <amount> <username> <password>**");
+    }
+    if (args[2].length > 14) {
+      return message.reply("Password must be less than 14 characters.");
+    }
+
+    const amount = parseInt(args[0]);
+    const username = args[1];
+    const password = args[2];
+
+    try {
+      await connection.query("USE " + config.databaseAuth);
+
+      const [result] = await connection.query("SELECT COUNT(username) AS count FROM account WHERE reg_mail = ?", [message.author.id]);
+      const existingAccounts = result[0].count;
+
+      if (existingAccounts >= 25) {
+        return message.reply("Error.");
+      }
+
+      const embed = new EmbedBuilder()
         .setColor(config.color)
-        .setTitle('Accounts Created')
-        .setDescription('Take a look at your accounts info below:')
+        .setTitle("Accounts Created")
+        .setDescription("Here are the details of your newly created accounts:")
         .setTimestamp()
-        .setFooter('Createmulti command', client.user.displayAvatarURL());
-        connection.query('USE ' + config.databaseAuth)
-        for(let counter = 1, myError = false; counter <= amount && myError === false; counter++){
-          connection.query('select count(username) from account where reg_mail = ?', [message.author.id], (error, results, fields) => {
+        .setFooter({ text: "Createmulti Command", iconURL: client.user?.displayAvatarURL() || "" });
 
-            if (error) return message.reply('An error occured.')
-            console.log(Object.values(results[0])[0])
-            if (Object.values(results[0])[0] <= 25) {
-              try {
-              soap.Soap(`account create ${username}${counter} ${password}`)
-              .then(result => { 
-                console.log(result)
-                if(result.faultString) {
-                  myError = true;
-                  if(counter >= amount) message.reply("Username already exists.")
-                  
-                    return;
+      for (let i = 1; i <= amount; i++) {
+        if (existingAccounts + i <= 25) {
+          const newUsername = `${username}${i}`;
+          const result = await soap.Soap(`account create ${newUsername} ${password}`);
 
-                }
-              
-                else{
-                  embed.addField(counter + ". Username | Password ", username + counter + " | " + password, false)
-                  connection.query(`UPDATE account set reg_mail = '${message.author.id}' WHERE username = '${username}${counter}'`, (error, results, fields) => {
+          if (result.faultString) {
+            return message.reply(`Error creating ${newUsername}: ${result.faultString}`);
+          }
 
-                  
-                  })
-                  
-                }
-      
-            
-            if(counter >= amount && myError === false) {
-
-              console.log(embed)
-              return message.channel.send(embed);
-            } 
-             
-          })
-
-        } catch (error) {
-          console.log(error)
+          await connection.query("UPDATE account SET reg_mail = ? WHERE username = ?", [message.author.id, newUsername]);
+          embed.addFields({ name: `${i}. Username | Password`, value: `${newUsername} | ${password}`, inline: false });
         }
-      } else {
-          if(counter === amount) message.reply('You already have 25 accounts!')
-          myError = true;
-        }
-          })
-        }
-        
-    
-	},
+      }
+
+      await message.channel.send({ embeds: [embed] });
+
+    } catch (error) {
+      console.error("Error: ", error);
+    }
+  },
 };
+//TODO: tests

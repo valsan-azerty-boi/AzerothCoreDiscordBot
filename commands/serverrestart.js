@@ -9,7 +9,7 @@ module.exports = {
     DMonly: false,
     async execute(message, args) {
         if (!args[0]) {
-            return message.reply(`You need to add a time param in seconds after the command. \nUsage: **!serverrestart <seconds>**`);
+            return message.reply(`You need to add a time param in seconds after the command.\nUsage: **!serverrestart <seconds>**`);
         }
 
         const timeInSeconds = parseInt(args[0], 10);
