@@ -1,3 +1,5 @@
+//TODO fix for latest version
+
 const { EmbedBuilder } = require("discord.js");
 const config = require("../config.js");
 const client = require("../server.js");
