@@ -3,9 +3,9 @@ const config = require("../config.js");
 const client = require("../server.js");
 const mysql = require("mysql2/promise");
 const connection = mysql.createPool({
-    host: config.host,
-    user: config.user,
-    password: config.password,
+    host: config.databaseHost,
+    user: config.databaseUser,
+    password: config.databasePassword,
     database: config.databaseCharacter,
     waitForConnections: true,
     connectionLimit: 10,
