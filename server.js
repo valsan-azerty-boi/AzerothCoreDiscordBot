@@ -1,6 +1,6 @@
-const { Client, GatewayIntentBits, Collection, ActivityType } = require('discord.js');
-const fs = require('fs');
-const config = require('./config.js');
+const { Client, GatewayIntentBits, Collection, ActivityType } = require("discord.js");
+const fs = require("fs");
+const config = require("./config.js");
 
 const client = new Client({
     intents: [
@@ -11,8 +11,8 @@ const client = new Client({
     ]
 });
 
-require('./databasesql.js')(client);
-const connection = require('./databasesql.js');
+require("./databasesql.js")(client);
+const connection = require("./databasesql.js");
 module.exports = client;
 
 client.commands = new Collection();
@@ -20,7 +20,7 @@ client.aliases = new Collection();
 client.cooldowns = new Collection();
 client.DMonlies = new Collection();
 
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"));
 
 for (const file of commandFiles) {
     const command = require(`./commands/${file}`);
@@ -31,8 +31,7 @@ for (const file of commandFiles) {
     }
 }
 
-// Startup
-client.once('ready', () => {
+client.once("ready", () => {
     console.log("----------");
     console.log(`Logged in as ${client.user.tag}!`);
     console.log("----------");
@@ -44,8 +43,7 @@ client.once('ready', () => {
     }, 360000);
 });
 
-// Command Handler
-client.on('messageCreate', async message => {
+client.on("messageCreate", async message => {
     if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
@@ -85,8 +83,8 @@ client.on('messageCreate', async message => {
             setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
         }
     } catch (error) {
-        console.error(error);
-        message.reply('There was an error trying to execute that command!');
+        console.error("Unexpected Error: ", error);
+        message.reply("There was an error trying to execute that command!");
     }
 });
 

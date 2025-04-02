@@ -33,7 +33,7 @@ module.exports = {
 
             await message.channel.send({ embeds: [embed] });
         } catch (err) {
-            console.error("Unexpected Error:", err);
+            console.error("Unexpected Error: ", err);
         }
     },
 };
