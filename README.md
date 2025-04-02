@@ -7,7 +7,7 @@ This way it verifies if the user is trying to use his own account created using 
 
 Requirements:
 
-    - NodeJS (Tested with v16.9.1)
+    - NodeJS (Tested with v18+)
     - Modules (Use installation to install them)
     - Discord Account with a bot account for bot token
 

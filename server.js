@@ -1,85 +1,93 @@
-const Discord = require("discord.js")
-const fs = require("fs")
-const config = require("./config.js")
-const client = new Discord.Client();
+const { Client, GatewayIntentBits, Collection, ActivityType } = require('discord.js');
+const fs = require('fs');
+const config = require('./config.js');
 
-require('./databasesql.js')(client)
-const connection = require('./databasesql.js')
-module.exports = client
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers
+    ]
+});
 
-client.commands = new Discord.Collection();
-client.aliases = new Discord.Collection()
-client.cooldowns = new Discord.Collection();
-client.DMonlies = new Discord.Collection();
+require('./databasesql.js')(client);
+const connection = require('./databasesql.js');
+module.exports = client;
+
+client.commands = new Collection();
+client.aliases = new Collection();
+client.cooldowns = new Collection();
+client.DMonlies = new Collection();
+
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	client.commands.set(command.name, command);
+    const command = require(`./commands/${file}`);
+    client.commands.set(command.name, command);
 
-	if (command.DMonly === true) {
-			client.DMonlies.set(command.name, command)
-	}
+    if (command.DMonly === true) {
+        client.DMonlies.set(command.name, command);
+    }
 }
 
-
 // Startup
-client.on('ready', () => {
-    console.log("----------")
-	console.log(`Logged in as ${client.user.tag}!`);
-    console.log("----------")
-	client.user.setActivity(config.statusMessage, { type: 'PLAYING' });
-	setInterval(() => {
-		client.user.setActivity(config.statusMessage, { type: 'PLAYING' });
-	  }, 360000);
+client.once('ready', () => {
+    console.log("----------");
+    console.log(`Logged in as ${client.user.tag}!`);
+    console.log("----------");
+
+    client.user.setActivity(config.statusMessage, { type: ActivityType.Playing });
+
+    setInterval(() => {
+        client.user.setActivity(config.statusMessage, { type: ActivityType.Playing });
+    }, 360000);
 });
 
 // Command Handler
+client.on('messageCreate', async message => {
+    if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
-client.on('message', async message => {
+    const args = message.content.slice(config.prefix.length).trim().split(/ +/);
+    const command = args.shift().toLowerCase();
+    const { DMonlies } = client;
 
-	if (!message.content.startsWith(config.prefix) || message.author.bot) return;
+    const DMonlyCommand = DMonlies.get(command);
 
-	const args = message.content.slice(config.prefix.length).trim().split(/ +/);
-	const command = args.shift().toLowerCase();
-	const { DMonlies } = client;
+    if (message.guild !== null && DMonlyCommand) 
+        return message.reply("This is a DM-only command.");
+    
+    if (!client.commands.has(command)) return;
 
-	const DMonlyCommand = DMonlies.get(command);
+    const { cooldowns } = client;
 
-	if(message.guild !== null && DMonlyCommand) return message.reply("This is a DM only command.")
-	if(!client.commands.has(command)) return;
+    if (!cooldowns.has(command)) {
+        cooldowns.set(command, new Collection());
+    }
 
-	const { cooldowns } = client;
+    const now = Date.now();
+    const timestamps = cooldowns.get(command);
+    const cooldownAmount = (client.commands.get(command).cooldown || 3) * 1000;
 
-		if (!cooldowns.has(command.name)) {
-			cooldowns.set(command.name, new Discord.Collection());
-		}
+    if (timestamps.has(message.author.id)) {
+        const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
 
-		const now = Date.now();
-		const timestamps = cooldowns.get(command.name);
-		const cooldownAmount = (command.cooldown || 3) * 1000;
+        if (now < expirationTime) {
+            const timeLeft = (expirationTime - now) / 1000;
+            return message.reply(`Please wait ${timeLeft.toFixed(1)} more second(s) before using this command again.`);
+        }
+    }
 
-		if (timestamps.has(message.author.id)) {
-			const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
-
-			if (now < expirationTime) {
-				const timeLeft = (expirationTime - now) / 1000;
-				return message.reply(`Please wait ${timeLeft.toFixed(1)} more second(s) before using this command again.`);
-			}
-		}
-
-	try {
-		if(client.commands.has(command)) client.commands.get(command).execute(message, args)
-
-		timestamps.set(message.author.id, now);
-		setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);	
-
-	} catch (error) {
-		console.error(error);
-		message.reply('There was an error trying to execute that command!');
-	}
+    try {
+        if (client.commands.has(command)) {
+            client.commands.get(command).execute(message, args);
+            timestamps.set(message.author.id, now);
+            setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
+        }
+    } catch (error) {
+        console.error(error);
+        message.reply('There was an error trying to execute that command!');
+    }
 });
 
-
-
-client.login(config.token)
+client.login(config.token);
