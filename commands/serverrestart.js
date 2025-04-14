@@ -20,9 +20,8 @@ module.exports = {
         try {
             const result = await soap.Soap(`server restart ${timeInSeconds}`);
 
-            console.log(result);
-            if (result.faultString) {
-                return message.reply(result.faultString);
+            if (!result || result.faultString) {
+                return message.reply(result?.faultString || "An error occurred.");
             }
 
             const embed = new Discord.EmbedBuilder()

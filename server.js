@@ -57,6 +57,10 @@ client.on("messageCreate", async message => {
 
     if (!client.commands.has(command)) return;
 
+    if (config.allowedUsers && config.allowedUsers.length > 0 && !config.allowedUsers.includes(message.author.id)) {
+        return message.reply("Not allowed to use bot commands (" + message.author.id + ").");
+    }
+
     const { cooldowns } = client;
 
     if (!cooldowns.has(command)) {
@@ -89,3 +93,11 @@ client.on("messageCreate", async message => {
 });
 
 client.login(config.token);
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+});
