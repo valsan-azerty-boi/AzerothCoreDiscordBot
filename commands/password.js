@@ -17,7 +17,7 @@ module.exports = {
 
             const username = args[0];
             const newPassword = args[1];
-            const results = await db.queryAuth("SELECT id AS accountId FROM account WHERE username = ?", [message.author.id, username]);
+            const results = await db.queryAuth("SELECT id AS accountId FROM account WHERE username = ?", [username]);
 
             if ((!results[0]?.accountId || results[0].accountId.length == 0)) {
                 return message.reply("This account doesn't exist.");
@@ -39,6 +39,7 @@ module.exports = {
             await message.channel.send({ embeds: [embed] });
         } catch (error) {
             console.error("Unexpected Error: ", error);
+            await message.channel.send("Internal Error.");
         }
     },
 };

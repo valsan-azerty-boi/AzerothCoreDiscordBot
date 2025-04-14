@@ -31,6 +31,7 @@ module.exports = {
             message.channel.send({ embeds: [embed] });
         } catch (error) {
             console.error("Unexpected Error:", error);
+            await message.channel.send("Internal Error.");
         }
     },
 };
