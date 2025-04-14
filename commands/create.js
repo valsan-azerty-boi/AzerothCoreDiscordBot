@@ -31,7 +31,7 @@ module.exports = {
                 .setDescription("The account has been successfully created.")
                 .addFields(
                     { name: "Username", value: username, inline: true },
-                    { name: "Password", value: "*".repeat(password.length), inline: true }
+                    { name: "Password", value: "x".repeat(password.length), inline: true }
                 )
                 .setTimestamp()
                 .setFooter({ text: "Create command", iconURL: client.user?.displayAvatarURL() || "" });

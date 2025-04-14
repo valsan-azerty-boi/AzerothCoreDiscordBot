@@ -31,7 +31,7 @@ module.exports = {
                 .setDescription("Your account credentials has been changed.")
                 .addFields(
                     { name: "Username", value: username, inline: true },
-                    { name: "Password", value: "*".repeat(newPassword.length), inline: true }
+                    { name: "Password", value: "x".repeat(newPassword.length), inline: true }
                 )
                 .setTimestamp()
                 .setFooter({ text: "Password command", iconURL: client.user?.displayAvatarURL() || "" });
