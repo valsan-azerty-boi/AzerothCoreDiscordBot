@@ -24,7 +24,7 @@ module.exports = {
             const onlineCount = countResults[0].onlineCount;
 
             const embed = new EmbedBuilder()
-                .setColor(config.color)
+                .setColor(config.color || "#00FF00")
                 .setTitle("Online Players")
                 .setDescription("Gives total count of online players")
                 .addFields({ name: "Amount of characters online:", value: `${onlineCount}` })

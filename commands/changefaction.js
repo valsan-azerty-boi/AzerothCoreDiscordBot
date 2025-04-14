@@ -14,46 +14,44 @@ module.exports = {
                 return message.reply(`You need to specify a character name.\nUsage: **${config.prefix}changefaction <charactername>**`);
             }
 
-            let charName = args[0].charAt(0).toUpperCase() + args[0].slice(1).toLowerCase();
+            const charName = args[0].charAt(0).toUpperCase() + args[0].slice(1).toLowerCase();
 
-            await connection.query("USE " + config.databaseCharacter);
-            connection.query("SELECT account FROM characters WHERE name = ?", [charName], (error, results1) => {
-                if (error) {
-                    console.error("SQL Error: ", error);
-                }
-                if (!results1[0]) {
-                    return message.reply("Character doesn't exist!");
-                }
+            await connection.query(`USE ${config.databaseCharacter}`);
+            const [charResults] = await connection.query(
+                "SELECT account FROM characters WHERE name = ?",
+                [charName]
+            );
 
-                connection.query("USE " + config.databaseAuth);
-                connection.query("SELECT id FROM account WHERE reg_mail = ? AND id = ?", [message.author.id, accountId], async (error, results2) => {
-                    if (error) {
-                        console.error("SQL Error: ", error);
-                    }
-                    if (!results2 || !results2[0]) {
-                        return message.reply("Couldn't find an account connected to the character.");
-                    }
+            if (!charResults[0]) {
+                return message.reply("Character doesn't exist!");
+            }
 
-                    try {
-                        const result = await soap.Soap(`character changefaction ${charName}`);
+            const accountId = charResults[0].account;
 
-                        if (result.faultString) {
-                            return message.reply(`${result.faultString}`);
-                        }
+            await connection.query(`USE ${config.databaseAuth}`);
+            const [accResults] = await connection.query(
+                "SELECT id FROM account WHERE id = ?",
+                [accountId]
+            );
 
-                        const embed = new EmbedBuilder()
-                            .setColor(config.color)
-                            .setTitle("Changefaction Success")
-                            .setDescription("You can now change the faction of this character.")
-                            .setTimestamp()
-                            .setFooter({ text: "Changefaction Command", iconURL: client.user.displayAvatarURL() });
+            if (!accResults[0]) {
+                return message.reply("Couldn't find an account connected to the character.");
+            }
 
-                        message.channel.send({ embeds: [embed] }).catch(console.error);
-                    } catch (soapError) {
-                        console.error("SOAP Error: ", soapError);
-                    }
-                });
-            });
+            const result = await soap.Soap(`character changefaction ${charName}`);
+
+            if (result.faultString) {
+                return message.reply(`${result.faultString}`);
+            }
+
+            const embed = new EmbedBuilder()
+                .setColor(config.color || "#00FF00")
+                .setTitle("Changefaction Success")
+                .setDescription(`You can now change the faction of **${charName}** on your next login.`)
+                .setTimestamp()
+                .setFooter({ text: "Changefaction Command", iconURL: client.user.displayAvatarURL() });
+
+            await message.channel.send({ embeds: [embed] });
         } catch (err) {
             console.error("Unexpected Error: ", err);
         }

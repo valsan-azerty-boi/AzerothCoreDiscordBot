@@ -16,7 +16,7 @@ module.exports = {
             ];
 
             const embed = new EmbedBuilder()
-                .setColor(config.color || "#0099ff")
+                .setColor(config.color || "#00FF00")
                 .setTitle("Help - Command List")
                 .setDescription(data.join("\n"))
                 .setTimestamp()
@@ -38,7 +38,7 @@ module.exports = {
         }
 
         const embed = new EmbedBuilder()
-            .setColor(config.color || "#0099ff")
+            .setColor(config.color || "#00FF00")
             .setTitle(`Command: ${command.name}`)
             .setDescription(command.description || "No description available.")
             .addFields(

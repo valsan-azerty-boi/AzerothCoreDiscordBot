@@ -47,7 +47,7 @@ module.exports = {
             }
 
             const embed = new EmbedBuilder()
-                .setColor(config.color)
+                .setColor(config.color || "#00FF00")
                 .setTitle("Rename Success")
                 .setDescription("You can rename the character at next login.")
                 .setTimestamp()

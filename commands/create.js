@@ -36,7 +36,7 @@ module.exports = {
                         connection.query("UPDATE account SET reg_mail = ? WHERE username = ?", [message.author.id, username]);
 
                         const embed = new EmbedBuilder()
-                            .setColor(config.color)
+                            .setColor(config.color || "#00FF00")
                             .setTitle("Account Created")
                             .setDescription("The account has been successfully created.")
                             .addFields(

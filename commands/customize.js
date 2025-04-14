@@ -41,7 +41,7 @@ module.exports = {
                 }
 
                 const embed = new EmbedBuilder()
-                    .setColor(config.color)
+                    .setColor(config.color || "#00FF00")
                     .setTitle("Customize Success")
                     .setDescription("You can customize the character at next login.")
                     .setTimestamp()

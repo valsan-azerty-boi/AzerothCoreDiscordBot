@@ -25,7 +25,7 @@ module.exports = {
             }
 
             const embed = new Discord.EmbedBuilder()
-                .setColor(config.color)
+                .setColor(config.color || "#00FF00")
                 .setTitle("Server Restart Success")
                 .setDescription("The server restarts soon.")
                 .setTimestamp()

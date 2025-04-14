@@ -49,7 +49,7 @@ module.exports = {
               }
 
               const embed = new EmbedBuilder()
-                .setColor(config.color)
+                .setColor(config.color || "#00FF00")
                 .setTitle("Changerace Success")
                 .setDescription("You can now change the race of your character.")
                 .setTimestamp()

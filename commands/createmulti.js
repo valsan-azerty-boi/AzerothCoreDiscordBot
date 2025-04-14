@@ -34,7 +34,7 @@ module.exports = {
       
       if (existingAccounts + i <= 25) {
         const embed = new EmbedBuilder()
-          .setColor(config.color)
+          .setColor(config.color || "#00FF00")
           .setTitle("Accounts Created")
           .setDescription("Here are the details of your newly created accounts:")
           .setTimestamp()

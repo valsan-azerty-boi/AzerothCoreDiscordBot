@@ -40,30 +40,23 @@ module.exports = {
             return message.reply("Couldn't find account connected to the character.");
           }
 
-          const isOwner = true;
+          try {
+            const result = await soap.Soap(`unstuck ${charName}`);
 
-          if (isOwner) {
-            try {
-              const result = await soap.Soap(`unstuck ${charName}`);
-
-              if (result.faultString) {
-                return message.reply("Error, please make sure that you're logged in.");
-              }
-
-              const embed = new EmbedBuilder()
-                .setColor(config.color || "#00FF00")
-                .setTitle("Unstuck Success")
-                .setDescription(`Character **${charName}** is now unstuck.`)
-                .setTimestamp()
-                .setFooter({ text: "Unstuck Command", iconURL: client.user.displayAvatarURL() });
-
-              await message.channel.send({ embeds: [embed] });
-
-            } catch (soapError) {
-              console.error(soapError);
+            if (result.faultString) {
+              return message.reply("Error, please make sure that you're logged in.");
             }
-          } else {
-            message.reply("The account bound to the character is not yours.");
+
+            const embed = new EmbedBuilder()
+              .setColor(config.color || "#00FF00")
+              .setTitle("Unstuck Success")
+              .setDescription(`Character **${charName}** is now unstuck.`)
+              .setTimestamp()
+              .setFooter({ text: "Unstuck Command", iconURL: client.user.displayAvatarURL() });
+
+            await message.channel.send({ embeds: [embed] });
+          } catch (soapError) {
+            console.error(soapError);
           }
         });
       });
@@ -72,5 +65,3 @@ module.exports = {
     }
   },
 };
-
-//TODO: tests

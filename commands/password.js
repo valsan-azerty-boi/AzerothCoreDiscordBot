@@ -33,7 +33,7 @@ module.exports = {
             }
 
             const embed = new EmbedBuilder()
-                .setColor(config.color)
+                .setColor(config.color || "#00FF00")
                 .setTitle("Password Changed")
                 .setDescription("Take a look at your new account credentials:")
                 .addFields(
