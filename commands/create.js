@@ -1,62 +1,45 @@
-//TODO fix for latest version
-
-const Discord = require("discord.js")
-const config = require('../config.js')
-const client = require('../server.js')
-const crypto = require('crypto')
-const connection = require('../databasesql.js');
+const { EmbedBuilder } = require("discord.js");
+const config = require("../config.js");
+const client = require("../server.js");
+const db = require("../databasesql.js");
 const soap = require("../soap.js");
+
 module.exports = {
-	name: 'create',
-	description: 'Creates new game account.',
-  DMonly: true,
-	execute(message, args) {
+    name: "create",
+    description: "Creates a new game account.",
+    DMonly: true,
 
-    try {
-      if(!args[0]) return message.reply(`You need to add a username after the command. \nUsage: **!create <username> <password>**`)
-      if(!args[1]) return message.reply(`You need to add a password after the username. \nUsage: **!create <username> <password>**`)
-      let username = args[0];
-      let password = args[1];
-      connection.query('USE ' + config.databaseAuth)
-        connection.query('select COUNT(username) from account where reg_mail = ?', [message.author.id], (error, results, fields) => {
-
-          if (error) return message.reply('An error occured.')
-
-
-          if (Object.values(results[0])[0] <= 25) {
-            try {
-            soap.Soap(`account create ${username} ${password}`)
-            .then(result => { 
-
-              console.log(result)
-              if(result.faultString) return message.reply("Username already exists.") 
-            
-              else connection.query(`UPDATE account set reg_mail = '${message.author.id}' WHERE username = '${username}'`)
-
-
-                  const embed = new Discord.MessageEmbed()
-                  .setColor(config.color)
-                  .setTitle('Account Created')
-                  .setDescription('Take a look at your account info below:')
-                  .addField('Username', username, true)
-                  .addField('Password', password, true)
-                  .setTimestamp()
-                  .setFooter('Create command', client.user.displayAvatarURL());
-          
-                message.channel.send(embed);
-
-              })
-            } catch (error) {
-              console.log(error)
+    async execute(message, args) {
+        try {
+            if (!args[0] || !args[1]) {
+                return message.reply(`Usage: **${config.prefix}create <username> <password>**`);
             }
-          } else {
-            message.reply('You already have 25 accounts!')
-          }
-          
-        })
-    } catch (error) {
-      console.log(error)
-      message.reply('Account creation failed due to an error.')
-    }     
-	},
+
+            const username = args[0];
+            const password = args[1];
+            const results = await db.queryAuth("SELECT COUNT(username) AS accountCount FROM account WHERE username = ?", [username]);
+
+            if (results[0].accountCount >= 1) {
+                return message.reply("Account already exists.");
+            }
+
+            await soap.Soap(`account create ${username} ${password}`);
+
+            const embed = new EmbedBuilder()
+                .setColor(config.color || "#00FF00")
+                .setTitle("Account Created")
+                .setDescription("The account has been successfully created.")
+                .addFields(
+                    { name: "Username", value: username, inline: true },
+                    { name: "Password", value: "x".repeat(password.length), inline: true }
+                )
+                .setTimestamp()
+                .setFooter({ text: "Create command", iconURL: client.user?.displayAvatarURL() || "" });
+
+            await message.channel.send({ embeds: [embed] });
+        } catch (err) {
+            console.error("Unexpected Error: ", err);
+            await message.channel.send("Internal Error.");
+        }
+    },
 };

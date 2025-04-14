@@ -11,5 +11,6 @@ module.exports = {
         databaseCharacter: 'acore_characters',
         soapPort: 7878,
         soapHostname: "127.0.0.1",
-        soapAuth: "username:passwd"
+        soapAuth: "username:passwd",
+        allowedUsers: []
 }

@@ -6,27 +6,23 @@ const soap = require("../soap.js");
 module.exports = {
     name: "serverrestart",
     description: "Restart the world server.",
-    DMonly: false,
+    DMonly: true,
+
     async execute(message, args) {
-        if (!args[0]) {
-            return message.reply(`You need to add a time param in seconds after the command. \nUsage: **!serverrestart <seconds>**`);
-        }
-
-        const timeInSeconds = parseInt(args[0], 10);
-        if (isNaN(timeInSeconds) || timeInSeconds < 5 || timeInSeconds > 3600) {
-            return message.reply(`Please provide a valid time in seconds (between 5 and 3600).`);
-        }
-
         try {
-            const result = await soap.Soap(`server restart ${timeInSeconds}`);
-
-            console.log(result);
-            if (result.faultString) {
-                return message.reply(result.faultString);
+            if (!args[0]) {
+                return message.reply(`You need to add a time param in seconds after the command.\nUsage: **${config.prefix}serverrestart <seconds>**`);
             }
 
+            const timeInSeconds = parseInt(args[0], 10);
+            if (isNaN(timeInSeconds) || timeInSeconds < 10 || timeInSeconds > 3600) {
+                return message.reply("Please provide a valid time in seconds (between 10 and 3600).");
+            }
+
+            await soap.Soap(`server restart ${timeInSeconds}`);
+
             const embed = new Discord.EmbedBuilder()
-                .setColor(config.color)
+                .setColor(config.color || "#00FF00")
                 .setTitle("Server Restart Success")
                 .setDescription("The server restarts soon.")
                 .setTimestamp()
@@ -34,7 +30,8 @@ module.exports = {
 
             message.channel.send({ embeds: [embed] });
         } catch (error) {
-            console.error(error);
+            console.error("Unexpected Error:", error);
+            await message.channel.send("Internal Error.");
         }
     },
 };

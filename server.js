@@ -11,8 +11,6 @@ const client = new Client({
     ]
 });
 
-require("./databasesql.js")(client);
-const connection = require("./databasesql.js");
 module.exports = client;
 
 client.commands = new Collection();
@@ -49,12 +47,18 @@ client.on("messageCreate", async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
     const { DMonlies } = client;
-
     const DMonlyCommand = DMonlies.get(command);
 
-    if (message.guild !== null && DMonlyCommand) 
-        return message.reply("This is a DM-only command.");
+    if (DMonlyCommand) {
+        if (!Array.isArray(config.allowedUsers) || config.allowedUsers.length === 0) {
+            return message.reply("No users are allowed to use bot commands.");
+        }
     
+        if (!config.allowedUsers.includes(message.author.id)) {
+            return message.reply(`You're not allowed to use bot commands (${message.author.id}).`);
+        }
+    }
+
     if (!client.commands.has(command)) return;
 
     const { cooldowns } = client;
@@ -89,3 +93,11 @@ client.on("messageCreate", async message => {
 });
 
 client.login(config.token);
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection:', reason);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+});
