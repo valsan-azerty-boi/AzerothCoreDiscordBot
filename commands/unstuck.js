@@ -8,6 +8,7 @@ module.exports = {
   name: 'unstuck',
   description: 'Unstucks your character.',
   DMonly: false,
+
   async execute(message, args) {
     try {
       if (!args[0]) {

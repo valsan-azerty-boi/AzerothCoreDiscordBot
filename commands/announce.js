@@ -7,13 +7,14 @@ module.exports = {
     name: "announce",
     description: "Create an instant announce.",
     DMonly: false,
+
     async execute(message, args) {
         try {
-            if (!args[0]) {
-                return message.reply(`You need to add a text param in seconds after the command.\nUsage: **${config.prefix}announce <text>**`);
+            if (!args.length) {
+                return message.reply(`You need to add text after the command.\nUsage: **${config.prefix}announce <text>**`);
             }
 
-            const announce = SomethingToDo;
+            const announce = args.join(" ");
 
             await soap.Soap(`announce ${announce}`);
 
@@ -24,10 +25,10 @@ module.exports = {
                 .setTimestamp()
                 .setFooter({ text: "Announce Command", iconURL: client.user.displayAvatarURL() });
 
-            message.channel.send({ embeds: [embed] });
+            await message.channel.send({ embeds: [embed] });
         } catch (error) {
-            console.error(error);
+            console.error("Unexpected Error:", error);
         }
     },
 };
-//TODO: fix & tests
+//TODO: tests

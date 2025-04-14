@@ -7,6 +7,7 @@ module.exports = {
     name: "online",
     description: "Gives total count of online players.",
     DMonly: false,
+
     async execute(message) {
         try {
             const countResults = await db.queryCharacter("SELECT COUNT(name) AS onlineCount FROM characters WHERE online = 1");

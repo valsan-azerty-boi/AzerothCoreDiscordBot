@@ -7,6 +7,7 @@ module.exports = {
     name: "serverrestart",
     description: "Restart the world server.",
     DMonly: false,
+
     async execute(message, args) {
         try {
             if (!args[0]) {
@@ -29,7 +30,7 @@ module.exports = {
 
             message.channel.send({ embeds: [embed] });
         } catch (error) {
-            console.error(error);
+            console.error("Unexpected Error:", error);
         }
     },
 };

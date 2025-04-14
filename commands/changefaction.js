@@ -8,6 +8,7 @@ module.exports = {
     name: "changefaction",
     description: "Change the faction of a character.",
     DMonly: false,
+
     async execute(message, args) {
         try {
             if (!args[0]) {
