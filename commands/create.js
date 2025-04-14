@@ -17,7 +17,7 @@ module.exports = {
 
             const username = args[0];
             const password = args[1];
-            const [results] = await db.queryAuth("SELECT COUNT(username) AS accountCount FROM account WHERE username = ?", [username]);
+            const results = await db.queryAuth("SELECT COUNT(username) AS accountCount FROM account WHERE username = ?", [username]);
 
             if (results[0].accountCount >= 1) {
                 return message.reply("Account already exists.");
@@ -42,4 +42,4 @@ module.exports = {
         }
     },
 };
-// TODO: tests
+// TODO: fix & tests

@@ -15,13 +15,11 @@ module.exports = {
                 return message.reply(`Usage: **${config.prefix}password <username> <newpassword>**`);
             }
 
-            const [username, newPassword] = args;
-            const [results] = await db.queryAuth(
-                "SELECT id FROM account WHERE username = ?",
-                [message.author.id, username]
-            );
+            const username = args[0];
+            const newPassword = args[1];
+            const results = await db.queryAuth("SELECT id AS accountId FROM account WHERE username = ?", [message.author.id, username]);
 
-            if (!results.length) {
+            if ((!results[0]?.accountId || results[0].accountId.length == 0)) {
                 return message.reply("This account doesn't exist.");
             }
 
