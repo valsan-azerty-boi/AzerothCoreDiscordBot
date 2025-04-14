@@ -12,7 +12,7 @@ module.exports = {
     async execute(message, args) {
         try {
             if (!args[0] || !args[1]) {
-                return message.reply("Usage: **!create <username> <password>**");
+                return message.reply(`Usage: **${config.prefix}create <username> <password>**`);
             }
 
             const username = args[0];

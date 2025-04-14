@@ -11,7 +11,7 @@ module.exports = {
 
     async execute(message, args) {
         if (args.length < 2) {
-            return message.reply("Usage: **!password <username> <newpassword>**");
+            return message.reply(`Usage: **${config.prefix}password <username> <newpassword>**`);
         }
 
         const [username, password] = args;

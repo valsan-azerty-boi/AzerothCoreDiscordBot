@@ -12,7 +12,7 @@ module.exports = {
   async execute(message, args) {
     try {
       if (!args[0]) {
-        return message.reply("You need to add a character name after the command.\nUsage: **!changerace <charactername>**");
+        return message.reply(`You need to add a character name after the command.\nUsage: **${config.prefix}changerace <charactername>**`);
       }
 
       let charName = args[0].charAt(0).toUpperCase() + args[0].slice(1).toLowerCase();

@@ -11,13 +11,13 @@ module.exports = {
 
   async execute(message, args) {
     if (!args[0] || isNaN(args[0])) {
-      return message.reply("Usage: **!createmulti <amount> <username> <password>**");
+      return message.reply(`Usage: **${config.prefix}createmulti <amount> <username> <password>**`);
     }
     if (!args[1]) {
-      return message.reply("You need to specify a username.\nUsage: **!createmulti <amount> <username> <password>**");
+      return message.reply(`You need to specify a username.\nUsage: **${config.prefix}createmulti <amount> <username> <password>**`);
     }
     if (!args[2]) {
-      return message.reply("You need to specify a password.\nUsage: **!createmulti <amount> <username> <password>**");
+      return message.reply(`You need to specify a password.\nUsage: **${config.prefix}createmulti <amount> <username> <password>**`);
     }
     if (args[2].length > 14) {
       return message.reply("Password must be less than 14 characters.");

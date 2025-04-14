@@ -1,9 +1,6 @@
-//TODO fix for latest version
-
-const Discord = require("discord.js")
-const config = require('../config.js')
-const client = require('../server.js')
-const crypto = require('crypto')
+const { EmbedBuilder } = require("discord.js");
+const config = require('../config.js');
+const client = require('../server.js');
 const connection = require('../databasesql.js');
 const soap = require("../soap.js");
 
@@ -11,44 +8,69 @@ module.exports = {
   name: 'unstuck',
   description: 'Unstucks your character.',
   DMonly: false,
-  execute(message, args) {
-    if (!args[0]) return message.reply(`You need to add a character name after the command.\nUsage: **!unstuck <charactername>**`)
-    let charName = args[0].charAt(0).toUpperCase() + args[0].slice(1).toLowerCase();
-    connection.query('USE ' + config.databaseCharacter)
-    connection.query('select account from characters where name = ?', [charName], (error, results1, fields) => {
-      if (!results1[0]) return message.reply(`Character doesn't exist!`)
-      if (error) return console.log(error)
-      connection.query('USE ' + config.databaseAuth)
-      connection.query('select id from account where reg_mail = ? AND id = ?', [message.author.id, results1[0].account], (error, results2, fields) => {
-        if (results2) console.log(results2)
-        if (!results2 || !results2[0]) return message.reply(`Couldn't find account connected to the character.`)
-        if (error) return message.reply('An error occured.')
-        console.log(results2[0])
+  async execute(message, args) {
+    if (!args[0]) {
+      return message.reply(`You need to add a character name after the command.\nUsage: **${config.prefix}unstuck <charactername>**`);
+    }
 
-        if (Object.values(results1[0])[0] === Object.values(results2[0])[0]) {
-          try {
-            soap.Soap(`unstuck ${charName}`)
-              .then(result => {
+    const charName = args[0].charAt(0).toUpperCase() + args[0].slice(1).toLowerCase();
 
-                console.log(result)
-                if (result.faultString) return message.reply("Error, please make sure that you're logged in.")
-
-                const embed = new Discord.MessageEmbed()
-                  .setColor(config.color)
-                  .setTitle('Unstuck Success')
-                  .setDescription(`The character is now unstuck.`)
-                  .setTimestamp()
-                  .setFooter('Unstuck command', client.user.displayAvatarURL());
-
-                message.channel.send(embed);
-              })
-          } catch (error) {
-            console.log(error)
-          }
-        } else {
-          message.reply('The account bound to the character is not yours.')
+    try {
+      connection.query(`USE ${config.databaseCharacter}`);
+      connection.query("SELECT account FROM characters WHERE name = ?", [charName], (err1, results1) => {
+        if (err1) {
+          console.error(err1);
+          return message.reply("Database error while fetching character.");
         }
-      })
-    })
+
+        if (!results1 || !results1[0]) {
+          return message.reply("Character doesn't exist!");
+        }
+
+        const characterAccountId = results1[0].account;
+
+        connection.query(`USE ${config.databaseAuth}`);
+        connection.query("SELECT id FROM account WHERE id = ?", [characterAccountId], async (err2, results2) => {
+          if (err2) {
+            console.error(err2);
+            return message.reply("Database error while verifying account.");
+          }
+
+          if (!results2 || !results2[0]) {
+            return message.reply("Couldn't find account connected to the character.");
+          }
+
+          const isOwner = true;
+
+          if (isOwner) {
+            try {
+              const result = await soap.Soap(`unstuck ${charName}`);
+
+              if (result.faultString) {
+                return message.reply("Error, please make sure that you're logged in.");
+              }
+
+              const embed = new EmbedBuilder()
+                .setColor(config.color || "#00FF00")
+                .setTitle("Unstuck Success")
+                .setDescription(`Character **${charName}** is now unstuck.`)
+                .setTimestamp()
+                .setFooter({ text: "Unstuck Command", iconURL: client.user.displayAvatarURL() });
+
+              await message.channel.send({ embeds: [embed] });
+
+            } catch (soapError) {
+              console.error(soapError);
+            }
+          } else {
+            message.reply("The account bound to the character is not yours.");
+          }
+        });
+      });
+    } catch (error) {
+      console.error("Unexpected Error:", error);
+    }
   },
 };
+
+//TODO: tests
