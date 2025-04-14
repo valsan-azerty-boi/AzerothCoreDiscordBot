@@ -2,9 +2,7 @@ AzerothCoreDiscordBot
 ----------------------------
 
 #### Bot startup
-Info: This bot uses Discord ID and stores it into the SQL acore auth database => account => reg_mail
-
-This way it verifies if the user is trying to use his own account created using the bot
+Info: This bot uses an authorized user list (Discord user ID) in configuration. This way it verifies if the user has the right to executes commands.
 
 #### Requirements:
     - NodeJS v18.20.5
