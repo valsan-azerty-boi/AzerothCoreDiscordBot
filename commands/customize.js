@@ -32,11 +32,7 @@ module.exports = {
                 return message.reply("Couldn't find account connected to the character.");
             }
 
-            const result = await soap.Soap(`character customize ${charName}`);
-
-            if (result.faultString) {
-                return message.reply(result.faultString);
-            }
+            await soap.Soap(`character customize ${charName}`);
 
             const embed = new EmbedBuilder()
                 .setColor(config.color || "#00FF00")

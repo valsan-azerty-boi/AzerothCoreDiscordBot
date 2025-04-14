@@ -7,10 +7,11 @@ module.exports = {
     name: "online",
     description: "Gives total count of online players.",
     DMonly: false,
-    async execute(message, args) {
+    async execute(message) {
         try {
             const countResults = await db.queryCharacter("SELECT COUNT(name) AS onlineCount FROM characters WHERE online = 1");
             const onlineCount = countResults[0].onlineCount;
+
             const embed = new EmbedBuilder()
                 .setColor(config.color || "#00FF00")
                 .setTitle("Online Players")
@@ -18,6 +19,7 @@ module.exports = {
                 .addFields({ name: "Amount of characters online:", value: `${onlineCount}` })
                 .setTimestamp()
                 .setFooter({ text: "Online command", iconURL: client.user?.displayAvatarURL() || "" });
+
             await message.channel.send({ embeds: [embed] });
         } catch (err) {
             console.error("Unexpected Error: ", err);

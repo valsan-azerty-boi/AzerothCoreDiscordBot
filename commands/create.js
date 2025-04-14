@@ -17,33 +17,26 @@ module.exports = {
 
             const username = args[0];
             const password = args[1];
-            const [results] = await db.queryAuth("SELECT COUNT(username) AS count FROM account WHERE username LIKE ?", [`${username}%`]);  
+            const [results] = await db.queryAuth("SELECT COUNT(username) AS accountCount FROM account WHERE username = ?", [username]);
 
-            if (results[0].accountCount >= 25) {
-                return message.reply("You can only have up to 25 accounts associated with your email.");
+            if (results[0].accountCount >= 1) {
+                return message.reply("Account already exists.");
             }
 
-            try {
-                const result = await soap.Soap(`account create ${username} ${password}`);
-                if (result.faultString) {
-                    return message.reply("Username already exists.");
-                }
+            await soap.Soap(`account create ${username} ${password}`);
 
-                const embed = new EmbedBuilder()
-                    .setColor(config.color || "#00FF00")
-                    .setTitle("Account Created")
-                    .setDescription("The account has been successfully created.")
-                    .addFields(
-                        { name: "Username", value: username, inline: true },
-                        { name: "Password", value: "*".repeat(newPassword.length), inline: true }
-                    )
-                    .setTimestamp()
-                    .setFooter({ text: "Create command", iconURL: client.user?.displayAvatarURL() || "" });
+            const embed = new EmbedBuilder()
+                .setColor(config.color || "#00FF00")
+                .setTitle("Account Created")
+                .setDescription("The account has been successfully created.")
+                .addFields(
+                    { name: "Username", value: username, inline: true },
+                    { name: "Password", value: "*".repeat(password.length), inline: true }
+                )
+                .setTimestamp()
+                .setFooter({ text: "Create command", iconURL: client.user?.displayAvatarURL() || "" });
 
-                await message.channel.send({ embeds: [embed] });
-            } catch (soapError) {
-                console.error("SOAP Error: ", soapError);
-            }
+            await message.channel.send({ embeds: [embed] });
         } catch (err) {
             console.error("Unexpected Error: ", err);
         }

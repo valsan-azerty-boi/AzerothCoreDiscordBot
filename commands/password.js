@@ -14,21 +14,18 @@ module.exports = {
             if (args.length < 2) {
                 return message.reply(`Usage: **${config.prefix}password <username> <newpassword>**`);
             }
-    
+
             const [username, newPassword] = args;
             const [results] = await db.queryAuth(
-                "SELECT id FROM account WHERE reg_mail = ? AND username = ?",
+                "SELECT id FROM account WHERE username = ?",
                 [message.author.id, username]
             );
 
             if (!results.length) {
-                return message.reply("This account doesn't exist or you do not own the account.");
+                return message.reply("This account doesn't exist.");
             }
 
-            const result = await soap.Soap(`account set password ${username} ${newPassword} ${newPassword}`);
-            if (result.faultString) {
-                return message.reply("Error occurred while changing the password.");
-            }
+            await soap.Soap(`account set password ${username} ${newPassword} ${newPassword}`);
 
             const embed = new EmbedBuilder()
                 .setColor(config.color || "#00FF00")
@@ -40,6 +37,7 @@ module.exports = {
                 )
                 .setTimestamp()
                 .setFooter({ text: "Password command", iconURL: client.user?.displayAvatarURL() || "" });
+
             await message.channel.send({ embeds: [embed] });
         } catch (error) {
             console.error("Unexpected Error: ", error);
