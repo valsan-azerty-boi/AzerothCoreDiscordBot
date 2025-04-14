@@ -2,7 +2,7 @@ AzerothCoreDiscordBot
 ----------------------------
 
 #### Bot startup
-Info: This bot uses an authorized user list (Discord user ID) in configuration. This way it verifies if the user has the right to executes commands.
+Info: This bot uses an 'allowedUsers' list (Discord ID) in configuration. This way it verifies if the user has the right to executes commands.
 
 #### Requirements:
     - NodeJS v18.20.5
@@ -16,7 +16,7 @@ Info: This bot uses an authorized user list (Discord user ID) in configuration. 
 
 #### Startup: 
     - Use a terminal
-    - Run "npm start"
+    - Run "npm start" or "node server.js"
 
 ### Extra information:
 - From [XanderDeLaet](https://github.com/XanderDeLaet): Special thanks to Village#9461 (no github) for funding the project.
