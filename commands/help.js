@@ -4,7 +4,7 @@ const config = require("../config.js");
 module.exports = {
     name: "help",
     description: "List all of my commands or info about a specific command.",
-    DMonly: false,
+    DMonly: true,
 
     async execute(message, args) {
         try {

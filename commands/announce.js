@@ -6,7 +6,7 @@ const soap = require("../soap.js");
 module.exports = {
     name: "announce",
     description: "Create an instant announce.",
-    DMonly: false,
+    DMonly: true,
 
     async execute(message, args) {
         try {
@@ -31,4 +31,3 @@ module.exports = {
         }
     },
 };
-//TODO: tests

@@ -6,7 +6,7 @@ const soap = require("../soap.js");
 module.exports = {
     name: "serverrestart",
     description: "Restart the world server.",
-    DMonly: false,
+    DMonly: true,
 
     async execute(message, args) {
         try {

@@ -47,17 +47,19 @@ client.on("messageCreate", async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/);
     const command = args.shift().toLowerCase();
     const { DMonlies } = client;
-
     const DMonlyCommand = DMonlies.get(command);
 
-    if (message.guild !== null && DMonlyCommand)
-        return message.reply("This is a DM-only command.");
+    if (DMonlyCommand) {
+        if (!Array.isArray(config.allowedUsers) || config.allowedUsers.length === 0) {
+            return message.reply("No users are allowed to use bot commands.");
+        }
+    
+        if (!config.allowedUsers.includes(message.author.id)) {
+            return message.reply(`You're not allowed to use bot commands (${message.author.id}).`);
+        }
+    }
 
     if (!client.commands.has(command)) return;
-
-    if (config.allowedUsers && config.allowedUsers.length > 0 && !config.allowedUsers.includes(message.author.id)) {
-        return message.reply("Not allowed to use bot commands (" + message.author.id + ").");
-    }
 
     const { cooldowns } = client;
 

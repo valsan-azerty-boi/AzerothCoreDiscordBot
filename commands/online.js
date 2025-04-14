@@ -6,7 +6,7 @@ const db = require("../databasesql.js");
 module.exports = {
     name: "online",
     description: "Gives total count of online players.",
-    DMonly: false,
+    DMonly: true,
 
     async execute(message) {
         try {

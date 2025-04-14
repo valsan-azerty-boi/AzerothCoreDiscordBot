@@ -7,7 +7,7 @@ const soap = require("../soap.js");
 module.exports = {
     name: "rename",
     description: "Mark character for rename at next login.",
-    DMonly: false,
+    DMonly: true,
 
     async execute(message, args) {
         try {
@@ -47,4 +47,3 @@ module.exports = {
         }
     },
 };
-//TODO: tests
