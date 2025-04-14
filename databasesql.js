@@ -1,35 +1,33 @@
+const mysql = require('mysql2/promise');
+const config = require("./config.js");
 
 let active = new Map();
-module.exports = (client) => {
-  const config = require("./config.js");
-  const Discord = require("discord.js");
-  const MySQLEvents = require('@rodrigogs/mysql-events');
-  var mysql = require('mysql2');
-  const connection = mysql.createConnection({
+
+const connectionPool = mysql.createPool({
     host: config.databaseHost,
     user: config.databaseUser,
     password: config.databasePassword,
-    database: config.databaseAuth
-  });
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
 
-  module.exports = connection
-
-  connection.connect(function (err) {
-    if (err) {
-      console.error(`Error connecting: ${err.stack}`);
-      return;
+const queryDatabase = async (database, query, params) => {
+    const connection = await connectionPool.getConnection();
+    try {
+        await connection.query("USE " + database);
+        const [results, fields] = await connection.query(query, params);
+        return results;
+    } catch (error) {
+        console.error("Database Error:", error);
+        throw error;
+    } finally {
+        connection.release();
     }
+};
 
-    console.log('Connected as id ' + connection.threadId);
-  });
-
-  const instance = new MySQLEvents(connection, {
-    startAtEnd: true,
-    excludedSchemas: {
-      mysql: true,
-    },
-  });
-
-  instance.on(MySQLEvents.EVENTS.CONNECTION_ERROR, console.error);
-  instance.on(MySQLEvents.EVENTS.ZONGJI_ERROR, console.error);
+module.exports = {
+    queryAuth: (query, params) => queryDatabase(config.databaseAuth, query, params),
+    queryWorld: (query, params) => queryDatabase(config.databaseWorld, query, params),
+    queryCharacter: (query, params) => queryDatabase(config.databaseCharacter, query, params),
 };

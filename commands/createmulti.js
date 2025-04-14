@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const config = require("../config.js");
 const client = require("../server.js");
-const connection = require("../databasesql.js");
+const db = require("../databasesql.js");
 const soap = require("../soap.js");
 
 module.exports = {
@@ -28,11 +28,10 @@ module.exports = {
     const password = args[2];
 
     try {
-      await connection.query("USE " + config.databaseAuth);
-      const [result] = await connection.query("SELECT COUNT(username) AS count FROM account WHERE reg_mail = ?", [message.author.id]);
-      const existingAccounts = result[0].count;
-      
-      if (existingAccounts + i <= 25) {
+      const [results] = await db.queryAuth("SELECT COUNT(username) AS count FROM account WHERE username LIKE ?", [`${username}%`]);  
+      const existingAccounts = results[0].count;
+
+      if (existingAccounts < 25) {
         const embed = new EmbedBuilder()
           .setColor(config.color || "#00FF00")
           .setTitle("Accounts Created")
@@ -48,8 +47,7 @@ module.exports = {
             return message.reply(`Error creating ${newUsername}: ${result.faultString}`);
           }
 
-          await connection.query("UPDATE account SET reg_mail = ? WHERE username = ?", [message.author.id, newUsername]);
-          embed.addFields({ name: `${i}. Username | Password`, value: `${newUsername} | ${password}`, inline: false });
+          embed.addFields({ name: `${i}. Username | Password`, value: `${newUsername} | ${"*".repeat(newPassword.length)}`, inline: false });
         }
 
         await message.channel.send({ embeds: [embed] });

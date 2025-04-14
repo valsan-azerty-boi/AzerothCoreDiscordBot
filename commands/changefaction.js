@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const config = require("../config.js");
 const client = require("../server.js");
-const connection = require("../databasesql.js");
+const db = require("../databasesql.js");
 const soap = require("../soap.js");
 
 module.exports = {
@@ -15,27 +15,20 @@ module.exports = {
             }
 
             const charName = args[0].charAt(0).toUpperCase() + args[0].slice(1).toLowerCase();
+            const charResults = await db.queryCharacter("SELECT account FROM characters WHERE name = ?", [charName]);
 
-            await connection.query(`USE ${config.databaseCharacter}`);
-            const [charResults] = await connection.query(
-                "SELECT account FROM characters WHERE name = ?",
-                [charName]
-            );
-
-            if (!charResults[0]) {
+            if (!charResults.length) {
                 return message.reply("Character doesn't exist!");
             }
 
             const accountId = charResults[0].account;
-
-            await connection.query(`USE ${config.databaseAuth}`);
-            const [accResults] = await connection.query(
+            const accResults = await db.queryAuth(
                 "SELECT id FROM account WHERE id = ?",
                 [accountId]
             );
 
             if (!accResults[0]) {
-                return message.reply("Couldn't find an account connected to the character.");
+                return message.reply("Couldn't find account connected to the character.");
             }
 
             const result = await soap.Soap(`character changefaction ${charName}`);
@@ -47,7 +40,7 @@ module.exports = {
             const embed = new EmbedBuilder()
                 .setColor(config.color || "#00FF00")
                 .setTitle("Changefaction Success")
-                .setDescription(`You can now change the faction of **${charName}** on your next login.`)
+                .setDescription("You can now change the faction of your character.")
                 .setTimestamp()
                 .setFooter({ text: "Changefaction Command", iconURL: client.user.displayAvatarURL() });
 

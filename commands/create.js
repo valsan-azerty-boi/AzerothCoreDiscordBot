@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const config = require("../config.js");
 const client = require("../server.js");
-const connection = require("../databasesql.js");
+const db = require("../databasesql.js");
 const soap = require("../soap.js");
 
 module.exports = {
@@ -17,41 +17,33 @@ module.exports = {
 
             const username = args[0];
             const password = args[1];
+            const [results] = await db.queryAuth("SELECT COUNT(username) AS count FROM account WHERE username LIKE ?", [`${username}%`]);  
 
-            await connection.query("USE " + config.databaseAuth);
+            if (results[0].accountCount >= 25) {
+                return message.reply("You can only have up to 25 accounts associated with your email.");
+            }
 
-            connection.query("SELECT COUNT(username) AS accountCount FROM account WHERE reg_mail = ?", [message.author.id], async (error, results) => {
-                if (error) {
-                    console.error("SQL Error: ", error);
+            try {
+                const result = await soap.Soap(`account create ${username} ${password}`);
+                if (result.faultString) {
+                    return message.reply("Username already exists.");
                 }
 
-                if (results[0].accountCount <= 25) {
-                    try {
-                        const result = await soap.Soap(`account create ${username} ${password}`);
+                const embed = new EmbedBuilder()
+                    .setColor(config.color || "#00FF00")
+                    .setTitle("Account Created")
+                    .setDescription("The account has been successfully created.")
+                    .addFields(
+                        { name: "Username", value: username, inline: true },
+                        { name: "Password", value: "*".repeat(newPassword.length), inline: true }
+                    )
+                    .setTimestamp()
+                    .setFooter({ text: "Create command", iconURL: client.user?.displayAvatarURL() || "" });
 
-                        if (result.faultString) {
-                            return message.reply("Username already exists.");
-                        }
-
-                        connection.query("UPDATE account SET reg_mail = ? WHERE username = ?", [message.author.id, username]);
-
-                        const embed = new EmbedBuilder()
-                            .setColor(config.color || "#00FF00")
-                            .setTitle("Account Created")
-                            .setDescription("The account has been successfully created.")
-                            .addFields(
-                                { name: "Username", value: username, inline: true },
-                                { name: "Password", value: password, inline: true }
-                            )
-                            .setTimestamp()
-                            .setFooter({ text: "Create command", iconURL: client.user?.displayAvatarURL() || "" });
-
-                        message.channel.send({ embeds: [embed] }).catch(console.error);
-                    } catch (soapError) {
-                        console.error("SOAP Error: ", soapError);
-                    }
-                }
-            });
+                await message.channel.send({ embeds: [embed] });
+            } catch (soapError) {
+                console.error("SOAP Error: ", soapError);
+            }
         } catch (err) {
             console.error("Unexpected Error: ", err);
         }

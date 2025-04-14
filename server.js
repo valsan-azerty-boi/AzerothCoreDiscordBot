@@ -11,8 +11,6 @@ const client = new Client({
     ]
 });
 
-require("./databasesql.js")(client);
-const connection = require("./databasesql.js");
 module.exports = client;
 
 client.commands = new Collection();

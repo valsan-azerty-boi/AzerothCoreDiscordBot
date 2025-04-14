@@ -1,7 +1,7 @@
 const { EmbedBuilder } = require("discord.js");
 const config = require("../config.js");
 const client = require("../server.js");
-const connection = require("../databasesql.js");
+const db = require("../databasesql.js");
 const soap = require("../soap.js");
 
 module.exports = {
@@ -12,58 +12,42 @@ module.exports = {
   async execute(message, args) {
     try {
       if (!args[0]) {
-        return message.reply(`You need to add a character name after the command.\nUsage: **${config.prefix}changerace <charactername>**`);
+        return message.reply(`You need to specify a character name.\nUsage: **${config.prefix}changerace <charactername>**`);
       }
 
-      let charName = args[0].charAt(0).toUpperCase() + args[0].slice(1).toLowerCase();
+      const charName = args[0].charAt(0).toUpperCase() + args[0].slice(1).toLowerCase();
+      const charResults = await db.queryCharacter("SELECT account FROM characters WHERE name = ?", [charName]);
 
-      await connection.query("USE " + config.databaseCharacter);
-      connection.query("SELECT account FROM characters WHERE name = ?", [charName], async (error, results1) => {
-        if (error) {
-          console.error("SQL Error: ", error);
-          return;
-        }
+      if (!charResults.length) {
+        return message.reply("Character doesn't exist!");
+      }
 
-        if (!results1[0]) {
-          return message.reply("Character doesn't exist!");
-        }
+      const accountId = charResults[0].account;
+      const accResults = await db.queryAuth(
+        "SELECT id FROM account WHERE id = ?",
+        [accountId]
+      );
 
-        await connection.query("USE " + config.databaseAuth);
+      if (!accResults[0]) {
+        return message.reply("Couldn't find account connected to the character.");
+      }
 
-        connection.query("SELECT id FROM account WHERE reg_mail = ? AND id = ?", [message.author.id, characterAccountId], async (error, results2) => {
-          if (error) {
-            console.error("SQL Error: ", error);
-            return;
-          }
+      const result = await soap.Soap(`character changerace ${charName}`);
 
-          if (!results2[0]) {
-            return message.reply("Couldn't find account connected to the character.");
-          }
+      if (result.faultString) {
+        return message.reply(result.faultString);
+      }
 
-          if (Object.values(results1[0])[0] === Object.values(results2[0])[0]) {
-            try {
-              const result = await soap.Soap(`character changerace ${charName}`);
+      const embed = new EmbedBuilder()
+        .setColor(config.color || "#00FF00")
+        .setTitle("Changerace Success")
+        .setDescription("You can now change the race of your character.")
+        .setTimestamp()
+        .setFooter({ text: "Changerace Command", iconURL: client.user?.displayAvatarURL() || "" });
 
-              if (result.faultString) {
-                return message.reply(result.faultString);
-              }
-
-              const embed = new EmbedBuilder()
-                .setColor(config.color || "#00FF00")
-                .setTitle("Changerace Success")
-                .setDescription("You can now change the race of your character.")
-                .setTimestamp()
-                .setFooter({ text: "Changerace Command", iconURL: client.user?.displayAvatarURL() || "" });
-
-              message.channel.send({ embeds: [embed] }).catch(console.error);
-            } catch (soapError) {
-              console.error("SOAP Error: ", soapError);
-            }
-          }
-        });
-      });
+      await message.channel.send({ embeds: [embed] });
     } catch (err) {
-      console.error("Unexpected Error: ", err);
+      console.error("Unexpected Error:", err);
     }
   },
 };

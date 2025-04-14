@@ -14,7 +14,7 @@ module.exports = {
 
         const timeInSeconds = parseInt(args[0], 10);
         if (isNaN(timeInSeconds) || timeInSeconds < 5 || timeInSeconds > 3600) {
-            return message.reply(`Please provide a valid time in seconds (between 5 and 3600).`);
+            return message.reply("Please provide a valid time in seconds (between 5 and 3600).");
         }
 
         try {
